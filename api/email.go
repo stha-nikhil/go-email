@@ -32,4 +32,14 @@ func SendEmail(c *gin.Context) {
 	r := rand.New(rand.NewSource(time.Now().UnixNano()))
 	messageID := strconv.FormatInt(r.Int63(), 10) + "@" + smtpHost
 
+	messageBody := "Thank you for reading this article."
+
+	message := "From: " + emailFrom + "\n" +
+		"To: " + emailTo + "\n" +
+		"Subject: " + "This is a subject" + "\n" +
+		"MIME-version: 1.0;\n" +
+		"Content-Type: text/html; charset=\"UTF-8\";\n" +
+		"Message-ID: <" + messageID + ">\n\n" +
+		messageBody
+
 }
