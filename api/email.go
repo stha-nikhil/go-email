@@ -1,6 +1,7 @@
 package api
 
 import (
+	"crypto/tls"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 	"math/rand"
@@ -47,8 +48,53 @@ func SendEmail(c *gin.Context) {
 	// Set up authentication
 	auth := smtp.PlainAuth("", emailFrom, emailPassword, smtpHost)
 
-	/* Without TLS */
-	err := smtp.SendMail(smtpHost+":"+smtpPort, auth, emailFrom, []string{emailTo}, []byte(message))
+	// Without TLS
+	/* err := smtp.SendMail(smtpHost+":"+smtpPort, auth, emailFrom, []string{emailTo}, []byte(message))
+	if err != nil {
+		//Handle error
+	} */
+
+
+	/* Using TLS */
+	tlsConfig := &tls.Config{
+		InsecureSkipVerify: false,
+		ServerName:         smtpHost,
+	}
+
+	conn, err := tls.Dial("tcp", smtpHost+":"+smtpPort, tlsConfig)
+	if err != nil {
+		//Handle error
+	}
+
+	client, err := smtp.NewClient(conn, smtpHost)
+	if err != nil {
+		//Handle error
+	}
+
+	// Authenticate
+	if err := client.Auth(auth); err != nil {
+		//Handle error
+	}
+
+	// Set the sender and recipient
+	if err := client.Mail(emailFrom); err != nil {
+		//Handle error
+	}
+	if err := client.Rcpt(emailTo); err != nil {
+		return
+	}
+
+	// Send the email body
+	wc, err := client.Data()
+	if err != nil {
+		//Handle error
+	}
+
+	_, err = wc.Write([]byte(message))
+	if err != nil {
+		//Handle error
+	}
+	err = wc.Close()
 	if err != nil {
 		//Handle error
 	}
