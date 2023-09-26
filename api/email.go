@@ -4,6 +4,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 	"math/rand"
+	"net/http"
+	"net/smtp"
 	"os"
 	"strconv"
 	"time"
@@ -41,5 +43,19 @@ func SendEmail(c *gin.Context) {
 		"Content-Type: text/html; charset=\"UTF-8\";\n" +
 		"Message-ID: <" + messageID + ">\n\n" +
 		messageBody
+
+	// Set up authentication
+	auth := smtp.PlainAuth("", emailFrom, emailPassword, smtpHost)
+
+	/* Without TLS */
+	err := smtp.SendMail(smtpHost+":"+smtpPort, auth, emailFrom, []string{emailTo}, []byte(message))
+	if err != nil {
+		//Handle error
+	}
+
+	c.IndentedJSON(http.StatusOK, gin.H{
+		"response": "success",
+		"message":  "email sent",
+	})
 
 }
